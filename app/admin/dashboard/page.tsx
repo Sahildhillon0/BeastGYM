@@ -325,12 +325,7 @@ export default function AdminDashboard() {
                     Notifications
                   </Button>
                 </Link>
-                <Link href="/ai-planner">
-                  <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white">
-                    <FaRobot className="mr-2" />
-                    AI Wellness Plan
-                  </Button>
-                </Link>
+
               </div>
             </CardContent>
           </Card>
