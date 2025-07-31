@@ -46,7 +46,7 @@ const TrainerSchema = new Schema<ITrainer>(
     specialization: { type: String },
     experience: { type: Number },
     bio: { type: String },
-    rating: { type: Number },
+    rating: { type: Number, default: 4.6 },
     students: { type: Number },
     certifications: [{ type: String }],
     languages: [{ type: String }],

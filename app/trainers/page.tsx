@@ -16,8 +16,8 @@ interface Trainer {
   photo: string
   contact: string
   bio?: string
-  rating?: number
-  students?: number
+  rating: number
+  students: number
   certifications?: string[]
   languages?: string[]
   availability?: string
@@ -207,19 +207,15 @@ export default function TrainersPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
                         {/* Trainer Stats Overlay */}
-                        <div className="absolute top-4 right-4 flex items-center space-x-2">
-                          {trainer.rating && (
-                            <div className="bg-yellow-500/90 text-black px-2 py-1 rounded-full text-xs font-bold flex items-center">
-                              <FaStar className="w-3 h-3 mr-1" />
-                              {trainer.rating}
-                            </div>
-                          )}
-                          {trainer.students && (
-                            <div className="bg-blue-500/90 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
-                              <FaUsers className="w-3 h-3 mr-1" />
-                              {trainer.students}+
-                            </div>
-                          )}
+                        <div className="absolute top-4 right-4 space-x-2">
+                          <div className="flex items-center space-x-1">
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar key={i} className={`w-4 h-4 ${
+                                i < 4 ? 'text-yellow-400' : 'text-gray-400'
+                              }`} />
+                            ))}
+                            <span className="text-yellow-400 text-sm font-medium">(4.6)</span>
+                          </div>
                         </div>
 
                         {/* Experience Badge */}

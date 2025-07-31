@@ -17,8 +17,6 @@ interface Trainer {
   photo: string
   contact: string
   bio?: string
-  rating?: number
-  students?: number
   certifications?: string[]
   specialties?: string[]
 }
@@ -92,8 +90,6 @@ export default function HomePageClient() {
       photo: "/placeholder-user.jpg",
       contact: "9876543210",
       bio: "Certified personal trainer with 8+ years of experience in bodybuilding and strength training.",
-      rating: 4.8,
-      students: 150,
       certifications: ["ACE Certified", "NASM Certified", "Bodybuilding Specialist"],
       specialties: ["Strength Training", "Muscle Building", "Powerlifting"]
     },
@@ -105,8 +101,6 @@ export default function HomePageClient() {
       photo: "/placeholder-user.jpg",
       contact: "9876543211",
       bio: "Experienced yoga instructor specializing in Vinyasa, Hatha, and meditation techniques.",
-      rating: 4.9,
-      students: 200,
       certifications: ["RYT-500", "Meditation Teacher", "Wellness Coach"],
       specialties: ["Vinyasa Yoga", "Meditation", "Mindfulness"]
     },
@@ -118,8 +112,6 @@ export default function HomePageClient() {
       photo: "/placeholder-user.jpg",
       contact: "9876543212",
       bio: "Dynamic fitness trainer focused on high-intensity workouts and cardiovascular conditioning.",
-      rating: 4.7,
-      students: 120,
       certifications: ["HIIT Specialist", "Cardio Expert", "Functional Training"],
       specialties: ["HIIT", "Cardio", "Functional Training"]
     }
@@ -550,18 +542,16 @@ export default function HomePageClient() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                         <div className="absolute bottom-4 left-4 right-4">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <div className="flex items-center">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${
-                                    i < Math.floor(trainer.rating || 0) ? 'text-yellow-400 fill-current' : 'text-gray-400'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                            <span className="text-white text-sm font-medium">({trainer.rating})</span>
+                          <div className="flex items-center space-x-1 mb-2">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-400'
+                                }`}
+                              />
+                            ))}
+                            <span className="text-yellow-400 text-sm font-medium">(4.6)</span>
                           </div>
                         </div>
                       </div>
@@ -572,9 +562,8 @@ export default function HomePageClient() {
                       </CardTitle>
                       <p className="text-orange-400 font-semibold text-lg mb-3">{trainer.specialization}</p>
                       <p className="text-gray-300 mb-4">{trainer.bio}</p>
-                      <div className="flex items-center justify-between text-gray-400 text-sm mb-4">
-                        <span>{trainer.experience} years experience</span>
-                        <span>{trainer.students} students</span>
+                      <div className="text-gray-400 text-sm mb-4">
+                        {trainer.experience} years experience
                       </div>
                       <div className="flex flex-wrap gap-2 mb-4">
                         {trainer.certifications?.slice(0, 2).map((cert, i) => (
