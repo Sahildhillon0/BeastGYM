@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   FaUsers, 
@@ -23,6 +24,11 @@ import { MdOutlineCardMembership } from "react-icons/md";
 import { BsCurrencyRupee } from "react-icons/bs";
 import { toast } from "sonner";
 import AddMemberDialog from "@/components/admin/AddMemberDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 interface Member {
   _id: string;
@@ -50,6 +56,61 @@ export default function AdminMembersPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
+  const [showUpdatePayment, setShowUpdatePayment] = useState(false);
+  const [selectedMemberForPayment, setSelectedMemberForPayment] = useState<Member | null>(null);
+
+  // Form schema for update payment
+  const formSchema = z.object({
+    amount: z.string().transform(Number).refine(
+      (num) => !isNaN(num) && num > 0,
+      "Amount must be a valid number greater than 0"
+    ),
+    expireDate: z.date().min(new Date(), "Expire date must be in the future")
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      amount: 0,
+      expireDate: new Date()
+    }
+  });
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!selectedMemberForPayment) return;
+
+    try {
+      console.log('Form submission data:', {
+        amount: data.amount,
+        parsedAmount: Number(data.amount),
+        expireDate: data.expireDate
+      });
+
+      const response = await fetch(`/api/members/${selectedMemberForPayment._id}/payment`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: Number(data.amount),
+          expireDate: data.expireDate.toISOString()
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Payment updated successfully');
+        setShowUpdatePayment(false);
+        setSelectedMemberForPayment(null);
+        fetchMembers();
+      } else {
+        toast.error('Failed to update payment');
+      }
+    } catch (error) {
+      console.error('Error updating payment:', error);
+      toast.error('Error updating payment');
+    }
+  };
 
 
   const membershipTypes = ["Monthly", "Quarterly", "Half Yearly", "Yearly"];
@@ -363,26 +424,41 @@ export default function AdminMembersPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2 w-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingMember(member);
+                            setShowAddDialog(true);
+                          }}
+                          className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700 text-xs sm:text-sm h-8 sm:h-9"
+                        >
+                          <FaEdit className="text-xs mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(member._id)}
+                          className="flex-1 border-red-600 text-red-400 hover:bg-red-600 hover:text-white h-8 sm:h-9"
+                        >
+                          <FaTrash className="text-xs mr-1" />
+                          Delete
+                        </Button>
+                      </div>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          setEditingMember(member);
-                          setShowAddDialog(true);
+                          setSelectedMemberForPayment(member);
+                          setShowUpdatePayment(true);
                         }}
-                        className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700 text-xs sm:text-sm h-8 sm:h-9"
+                        className="w-full border-green-600 text-green-400 hover:bg-green-600 hover:text-white h-8 sm:h-9"
                       >
-                        <FaEdit className="text-xs mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(member._id)}
-                        className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white h-8 sm:h-9 w-8 sm:w-9 p-0"
-                      >
-                        <FaTrash className="text-xs" />
+                        <BsCurrencyRupee className="text-xs mr-2" />
+                        Update Payment
                       </Button>
                     </div>
                   </CardContent>
@@ -404,6 +480,77 @@ export default function AdminMembersPage() {
           fetchMembers();
         }}
       />
+
+      {/* Update Payment Dialog */}
+      <Dialog open={showUpdatePayment} onOpenChange={setShowUpdatePayment}>
+        <DialogContent className="bg-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Update Payment</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amount (₹)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter amount"
+                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="expireDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expire Date</FormLabel>
+                    <FormControl>
+                      <input
+                        type="date"
+                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 w-full"
+                        {...field}
+                        value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                        onChange={(e) => {
+                          const date = new Date(e.target.value);
+                          if (!isNaN(date.getTime())) {
+                            field.onChange(date);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowUpdatePayment(false);
+                    setSelectedMemberForPayment(null);
+                  }}
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                  Update Payment
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

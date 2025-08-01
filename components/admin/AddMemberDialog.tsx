@@ -272,11 +272,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[95vw] max-w-[95vw] sm:w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl 
-                                  h-[95vh] sm:h-auto sm:max-h-[90vh] 
-                                  fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-                                  overflow-y-auto bg-gray-900 border-gray-700 
-                                  p-4 sm:p-5 lg:p-6 rounded-lg">
+        <DialogContent className="w-[95vw] max-w-[95vw] sm:w-full sm:max-w-4xl md:max-w-5xl h-[85vh] sm:h-auto sm:max-h-[81vh] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 overflow-y-auto bg-gray-900 border-gray-700 p-6 rounded-lg">
           <DialogHeader className="pb-4 flex-shrink-0">
             <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-white flex items-center gap-2">
               <FaUser className="text-green-400 text-base sm:text-lg lg:text-xl" />
@@ -553,7 +549,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
                 type="submit"
                 disabled={isSubmitting}
                 className="bg-green-600 hover:bg-green-700 text-white 
-                          text-base py-3 px-6 h-12 w-full sm:w-auto min-w-[140px]"
+                          text-base py-3 px-6 h-12 w-full sm:w-auto min-w-[140px] mb-10"
               >
                 {isSubmitting ? 'Saving...' : (member ? 'Save Changes' : 'Add Member')}
               </Button>
