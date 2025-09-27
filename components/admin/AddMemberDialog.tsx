@@ -217,6 +217,45 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
     setIsSubmitting(true);
 
     try {
+      // Upload photos to Cloudinary if they are base64 strings
+      let photoFrontUrl = formData.photoFront;
+      let photoBackUrl = formData.photoBack;
+
+      // Only upload if the photo is a base64 string and not already a URL
+      if (formData.photoFront && formData.photoFront.startsWith('data:image')) {
+        console.log('Uploading front photo to Cloudinary...');
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: formData.photoFront }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to upload front photo');
+        }
+        
+        const data = await response.json();
+        photoFrontUrl = data.url;
+        console.log('Front photo uploaded to:', photoFrontUrl);
+      }
+
+      if (formData.photoBack && formData.photoBack.startsWith('data:image')) {
+        console.log('Uploading back photo to Cloudinary...');
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: formData.photoBack }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to upload back photo');
+        }
+        
+        const data = await response.json();
+        photoBackUrl = data.url;
+        console.log('Back photo uploaded to:', photoBackUrl);
+      }
+
       const memberData = {
         name: formData.name,
         email: formData.email,
@@ -224,18 +263,13 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
         membershipType: formData.membershipType,
         startDate: formData.startDate,
         endDate: formData.endDate,
-        photoFront: formData.photoFront,
-        photoBack: formData.photoBack,
+        photoFront: photoFrontUrl,
+        photoBack: photoBackUrl,
         amountPaid: parseFloat(formData.amountPaid) || 0,
         amountBalance: parseFloat(formData.amountBalance) || 0,
       };
 
       console.log('Submitting member data:', memberData);
-      console.log('amountBalance value:', formData.amountBalance, 'parsed:', parseFloat(formData.amountBalance));
-
-      console.log('Submitting memberData:', memberData);
-      console.log('amountPaid value:', formData.amountPaid, 'parsed:', parseFloat(formData.amountPaid));
-      console.log('amountBalance value:', formData.amountBalance, 'parsed:', parseFloat(formData.amountBalance));
 
       const url = member ? `/api/members?id=${member._id}` : '/api/members';
       const method = member ? 'PUT' : 'POST';
